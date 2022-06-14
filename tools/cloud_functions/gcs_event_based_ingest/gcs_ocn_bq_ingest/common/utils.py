@@ -260,13 +260,13 @@ def get_batches_for_prefix(
                 cumulative_bytes = blob.size
 
     # pick up remaining files in the final batch
-    if len(batch) > 0:
+    if batch:
         batches.append(batch.copy())
         batch.clear()
 
     if len(batches) > 1:
         print(f"split into {len(batches)} batches.")
-    elif len(batches) < 1:
+    elif not batches:
         raise google.api_core.exceptions.NotFound(
             f"No files to load at {prefix_path}!")
     return batches
@@ -357,9 +357,8 @@ def dict_to_bq_schema(schema: List[Dict]) -> List[bigquery.SchemaField]:
     default_mode = "NULLABLE"
     return [
         bigquery.SchemaField(
-            x["name"],
-            x["type"],
-            mode=x.get("mode") if x.get("mode") else default_mode)
+            x["name"], x["type"], mode=x.get("mode") or default_mode
+        )
         for x in schema
     ]
 
@@ -368,9 +367,7 @@ def dict_to_bq_schema(schema: List[Dict]) -> List[bigquery.SchemaField]:
 # https://www.python.org/dev/peps/pep-0616/
 def removeprefix(in_str: str, prefix: str) -> str:
     """remove string prefix"""
-    if in_str.startswith(prefix):
-        return in_str[len(prefix):]
-    return in_str[:]
+    return in_str[len(prefix):] if in_str.startswith(prefix) else in_str[:]
 
 
 def removesuffix(in_str: str, suffix: str) -> str:
@@ -464,8 +461,7 @@ def get_table_prefix(object_id: str) -> str:
             f"could not determine table prefix for object id: {object_id}"
             "because it did not contain a match for destination_regex: "
             f"{constants.DESTINATION_REGEX.pattern}")
-    table_group_index = match.re.groupindex.get("table")
-    if table_group_index:
+    if table_group_index := match.re.groupindex.get("table"):
         table_level_index = match.regs[table_group_index][1]
         return object_id[:table_level_index]
     raise exceptions.DestinationRegexMatchException(

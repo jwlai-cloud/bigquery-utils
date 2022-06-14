@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """integration tests for gcs_ocn_bq_ingest"""
+
 import os
 import time
 
@@ -21,7 +22,7 @@ from google.cloud import bigquery
 
 import gcs_ocn_bq_ingest.main
 
-TEST_DIR = os.path.realpath(os.path.dirname(__file__) + "/..")
+TEST_DIR = os.path.realpath(f"{os.path.dirname(__file__)}/..")
 LOAD_JOB_POLLING_TIMEOUT = 20  # seconds
 
 

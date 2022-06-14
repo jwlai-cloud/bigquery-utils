@@ -5,7 +5,7 @@ REGEX_SEARCH = r"(?:SELECT|WITH|CREATE|ALTER|DROP|INSERT|UPDATE|EXEC|CALL|USING)
 
 class GoogleExtractionModule(object):
 
-    def find_queries(html):
+    def find_queries(self):
         """ Finds queries and extracts them from Google SQL documentation on
         cloud.google.com.
 
@@ -18,7 +18,7 @@ class GoogleExtractionModule(object):
             A list of queries in the form of strings.
         """
 
-        soup = BeautifulSoup(html.text, "html.parser")
+        soup = BeautifulSoup(self.text, "html.parser")
         queries = []
         code_blocks = soup.find_all("code")
         for block in code_blocks:

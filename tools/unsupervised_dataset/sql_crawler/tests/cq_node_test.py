@@ -2,8 +2,7 @@
 import sql_crawler.cq_node as cq_node
 
 def mock_node():
-    node = cq_node.CQNode("https://google.com", 5)
-    return node
+    return cq_node.CQNode("https://google.com", 5)
 
 def test_url():
     assert mock_node().get_url() == "https://google.com"

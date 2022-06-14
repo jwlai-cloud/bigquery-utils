@@ -84,9 +84,9 @@ def backlog_subscriber(gcs_client: Optional[storage.Client],
             "1 minute (Cloud Functions default).")
     while time.monotonic() < restart_time - polling_timeout - 1:
         first_bq_lock_claim = False
-        lock_contents = utils.read_gcs_file_if_exists(
-            gcs_client, f"gs://{bkt.name}/{lock_blob.name}")
-        if lock_contents:
+        if lock_contents := utils.read_gcs_file_if_exists(
+            gcs_client, f"gs://{bkt.name}/{lock_blob.name}"
+        ):
             # is this a lock placed by this cloud function.
             # the else will handle a manual _bqlock
             if lock_contents.startswith(
@@ -102,7 +102,7 @@ def backlog_subscriber(gcs_client: Optional[storage.Client],
                       f"manual lock contents: {lock_contents}. ")
                 time.sleep(polling_timeout)
                 continue
-        else:  # this condition handles absence of _bqlock file
+        else:
             first_bq_lock_claim = True
             last_job_done = True  # there's no running job to poll.
 
@@ -115,9 +115,9 @@ def backlog_subscriber(gcs_client: Optional[storage.Client],
             # If the BQ lock was missing we do not want to delete a backlog
             # item for a job we have not yet submitted.
             utils.remove_oldest_backlog_item(gcs_client, bkt, table_prefix)
-        should_subscriber_exit = handle_backlog(gcs_client, bq_client, bkt,
-                                                lock_blob, backfill_blob)
-        if should_subscriber_exit:
+        if should_subscriber_exit := handle_backlog(
+            gcs_client, bq_client, bkt, lock_blob, backfill_blob
+        ):
             return
     # retrigger the subscriber loop by reposting the _BACKFILL file
     print("ran out of time, restarting backfill subscriber loop for:"
@@ -181,9 +181,9 @@ def handle_backlog(
     """
     table_prefix = utils.get_table_prefix(backfill_blob.name)
     check_backlog_time = time.monotonic()
-    next_backlog_file = utils.get_next_backlog_item(gcs_client, bkt,
-                                                    table_prefix)
-    if next_backlog_file:
+    if next_backlog_file := utils.get_next_backlog_item(
+        gcs_client, bkt, table_prefix
+    ):
         next_success_file: storage.Blob = bkt.blob(
             next_backlog_file.name.replace("/_backlog/", "/"))
         if not next_success_file.exists(client=gcs_client):
@@ -212,9 +212,9 @@ def handle_backlog(
               "race condition in the event that something caused the "
               "delete operation was delayed or had to be retried for a "
               "long time.")
-        next_backlog_file = utils.get_next_backlog_item(gcs_client, bkt,
-                                                        table_prefix)
-        if next_backlog_file:
+        if next_backlog_file := utils.get_next_backlog_item(
+            gcs_client, bkt, table_prefix
+        ):
             # The backfill file was deleted but the backlog is
             # not empty. Re-trigger the backfill subscriber loop by
             # dropping a new backfill file.
@@ -306,12 +306,9 @@ def subscriber_monitor(gcs_client: Optional[storage.Client],
     """
     if not gcs_client:
         gcs_client = storage.Client(client_info=constants.CLIENT_INFO)
-    backfill_blob = start_backfill_subscriber_if_not_running(
-        gcs_client, bkt, utils.get_table_prefix(object_id))
-
-    # backfill blob may be none if the START_BACKFILL_FILENAME has not been
-    # dropped
-    if backfill_blob:
+    if backfill_blob := start_backfill_subscriber_if_not_running(
+        gcs_client, bkt, utils.get_table_prefix(object_id)
+    ):
         # Handle case where a subscriber loop was not able to repost the
         # backfill file before the cloud function timeout.
         time_created_utc = backfill_blob.time_created.replace(tzinfo=pytz.UTC)

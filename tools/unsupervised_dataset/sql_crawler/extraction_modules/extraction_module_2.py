@@ -6,7 +6,7 @@ REGEX_COMMENT = r"--.*"
 
 class ExtractionModule2:
 
-    def find_queries(html):
+    def find_queries(self):
         """ Finds queries and extracts them from websites.
 
         Args:
@@ -15,7 +15,7 @@ class ExtractionModule2:
         Returns
             A list of queries in the form of strings.
         """
-        soup = BeautifulSoup(html.text, "html.parser")
+        soup = BeautifulSoup(self.text, "html.parser")
         queries = []
         code_blocks = soup.find_all("code")
         for block in code_blocks:

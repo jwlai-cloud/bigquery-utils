@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """integration tests for the ordering behavior of backlog gcs_ocn_bq_ingest"""
+
 import multiprocessing
 import os
 import queue
@@ -27,7 +28,7 @@ import gcs_ocn_bq_ingest.common.ordering
 import gcs_ocn_bq_ingest.common.utils
 import gcs_ocn_bq_ingest.main
 
-TEST_DIR = os.path.realpath(os.path.dirname(__file__) + "/..")
+TEST_DIR = os.path.realpath(f"{os.path.dirname(__file__)}/..")
 LOAD_JOB_POLLING_TIMEOUT = 20  # seconds
 
 # Testing that the subscriber does not get choked up by a common race condition

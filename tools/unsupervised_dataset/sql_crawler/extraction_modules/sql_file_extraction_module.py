@@ -9,7 +9,7 @@ class SQLFileExtractionModule():
     """ A module to extract individual SQL queries from a file, given the contents of the file.
     """
 
-    def find_queries(file_contents):
+    def find_queries(self):
         """ Finds queries and extracts them from a SQL file.
 
         Args:
@@ -19,7 +19,7 @@ class SQLFileExtractionModule():
             A list of queries in the form of strings.
         """
         # Remove comments -- and /* */
-        cleaned_contents = re.sub(SINGLE_COMMENT, " ", file_contents)
+        cleaned_contents = re.sub(SINGLE_COMMENT, " ", self)
         cleaned_contents = re.sub(BLOCK_COMMENT, " ", cleaned_contents, flags=re.DOTALL)
 
         # Split according to ; and remove unnecessary whitespace

@@ -22,8 +22,8 @@ class CrawlerLog(object):
 
         self.start_time = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M")
         folder_path = str(pathlib.Path(__file__).parent)
-        log_folder_path = folder_path + "/logs"
-        query_folder_path = folder_path + "/queries"
+        log_folder_path = f"{folder_path}/logs"
+        query_folder_path = f"{folder_path}/queries"
 
         # Create directory for logs if it does not already exists
         if not os.path.exists(log_folder_path):
@@ -43,7 +43,7 @@ class CrawlerLog(object):
             self.csv_file = open(self.query_name, "a")
             self.queries = csv.writer(self.csv_file)
             self.queries.writerow(["Query", "URL"])
-        
+
         self.save_to_gcs = False
         self.save_to_bq = False
         self.batch_data = []
@@ -72,8 +72,9 @@ class CrawlerLog(object):
         """
 
         if self.save_to_bq:
-            err = cloud_integration.insert_rows(self.bq_project, self.bq_dataset, self.bq_table, data)
-            if err:
+            if err := cloud_integration.insert_rows(
+                self.bq_project, self.bq_dataset, self.bq_table, data
+            ):
                 self.log_error(err)
 
         if not self.stream:
@@ -151,15 +152,15 @@ class CrawlerLog(object):
         """
 
         logging.info("Finished crawling.")
-        
+
         # Flush remaining queries and close file
         self.flush_data(self.batch_data)
         if not self.stream:
             self.csv_file.close()
 
-        # Save file to GCS, if applicable
-        file_name = "queries_{0}".format(self.start_time)
         if self.save_to_gcs:
+            # Save file to GCS, if applicable
+            file_name = "queries_{0}".format(self.start_time)
             status, message = cloud_integration.upload_gcs_file(self.gcs_project,
                 self.gcs_bucket, file_name, self.query_name)
             if status:

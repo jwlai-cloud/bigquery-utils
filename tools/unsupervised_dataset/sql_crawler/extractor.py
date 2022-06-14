@@ -55,8 +55,7 @@ def extract_queries(html):
 
     extractor_module = retrieve_module(html.url)
     found_queries = extractor_module.find_queries(html)
-    cleaned_queries = [re.sub("\s+", " ", query) for query in found_queries]
-    return cleaned_queries
+    return [re.sub("\s+", " ", query) for query in found_queries]
 
 def retrieve_module(url):
     """ Retrieves the correct module to use for extracting queries

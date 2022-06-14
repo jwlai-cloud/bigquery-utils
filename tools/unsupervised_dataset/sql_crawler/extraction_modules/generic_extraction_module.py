@@ -9,7 +9,7 @@ class GenericExtractionModule():
         format of a site.
     """
 
-    def find_queries(html_response):
+    def find_queries(self):
         """ Finds queries and extracts them from any website, without using HTML
         tags to locate them.
 
@@ -20,10 +20,8 @@ class GenericExtractionModule():
             A list of queries in the form of strings.
         """
         # Remove HTML tags and special characters
-        content = html_response.text
+        content = self.text
         converted = html.unescape(content)
         tags_removed = re.sub('<[^<]+?>', '', converted)
 
-        # Look for text that matches common SQL queries
-        matches = re.findall(REGEX_SEARCH, tags_removed, re.DOTALL)
-        return matches
+        return re.findall(REGEX_SEARCH, tags_removed, re.DOTALL)

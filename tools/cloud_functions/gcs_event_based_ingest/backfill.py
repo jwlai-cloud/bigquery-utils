@@ -101,7 +101,7 @@ def main(args: argparse.Namespace):
                     },
                     None,
                 )] = f"gs://{blob.bucket.name}/{blob.name}"
-        exceptions: Dict[str, Exception] = dict()
+        exceptions: Dict[str, Exception] = {}
         for future in concurrent.futures.as_completed(future_to_gsurl):
             gsurl = future_to_gsurl[future]
             try:

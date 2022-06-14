@@ -24,7 +24,7 @@ def create_bigquery_table(project_id, dataset_id, table_id):
         bigquery.SchemaField("URL", "STRING", mode="REQUIRED"),
     ]
 
-    table_id = "{}.{}.{}".format(project_id, dataset_id, table_id)
+    table_id = f"{project_id}.{dataset_id}.{table_id}"
     table = bigquery.Table(table_id, schema=schema)
     try:
         table = client.create_table(table)
@@ -46,11 +46,10 @@ def insert_rows(project_id, dataset_id, table_id, data):
     """
 
     client = bigquery.Client(project=project_id)
-    table_id = "{}.{}.{}".format(project_id, dataset_id, table_id)
+    table_id = f"{project_id}.{dataset_id}.{table_id}"
 
     table = client.get_table(table_id)
-    errors = client.insert_rows(table, data)
-    return errors
+    return client.insert_rows(table, data)
 
 def load_bigquery_table(project_id, dataset_id, table_id, filename):
     """ Uploads a file to Google BigQuery.
@@ -85,7 +84,7 @@ def load_bigquery_table(project_id, dataset_id, table_id, filename):
         job.result()
     except Exception as e:
         return False, job.errors
-    return True, "Loaded {} rows into {}:{}.".format(job.output_rows, dataset_id, table_id)
+    return True, f"Loaded {job.output_rows} rows into {dataset_id}:{table_id}."
 
 def upload_gcs_file(project_id, bucket_id, destination_blob_name, filename):
     """ Uploads a file to Google Cloud Storage.
@@ -109,4 +108,4 @@ def upload_gcs_file(project_id, bucket_id, destination_blob_name, filename):
     except Exception as e:
         return False, e
 
-    return True, "File {} uploaded to {}.".format(filename, destination_blob_name)
+    return True, f"File {filename} uploaded to {destination_blob_name}."

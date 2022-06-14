@@ -127,8 +127,7 @@ def test_default_destination_regex(test_input: str,
     this test is to support improving this regex in the future w/o regressing
     for existing use cases.
     """
-    match = COMPILED_DEFAULT_DENTINATION_REGEX.match(test_input)
-    if match:
+    if match := COMPILED_DEFAULT_DENTINATION_REGEX.match(test_input):
         assert match.groupdict() == expected
     else:
         raise AssertionError(f"{COMPILED_DEFAULT_DENTINATION_REGEX}"

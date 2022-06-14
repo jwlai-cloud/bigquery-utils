@@ -50,7 +50,7 @@ BQ_CLIENT = None
 GCS_CLIENT = None
 
 
-def main(event: Dict, context):  # pylint: disable=unused-argument
+def main(event: Dict, context):    # pylint: disable=unused-argument
     """entry point for background cloud function for event driven GCS to
     BigQuery ingest."""
     try:
@@ -85,25 +85,24 @@ def main(event: Dict, context):  # pylint: disable=unused-argument
         triage_event(gcs_client, bq_client, event_blob, function_start_time,
                      enforce_ordering)
 
-    # Unexpected exceptions will actually raise which may cause a cold restart.
     except exceptions.DuplicateNotificationException:
         print("recieved duplicate notification. this was handled gracefully.  "
               f"{traceback.format_exc()}")
 
     except exceptions.EXCEPTIONS_TO_REPORT as original_error:
-        # We do this because we know these errors do not require a cold restart
-        # of the cloud function.
-        if (distutils.util.strtobool(
-                os.getenv("USE_ERROR_REPORTING_API", "True"))):
-            try:
-                lazy_error_reporting_client().report_exception()
-            except Exception:  # pylint: disable=broad-except
-                # This mostly handles the case where error reporting API is not
-                # enabled or IAM permissions did not allow us to report errors
-                # with error reporting API.
-                raise original_error  # pylint: disable=raise-missing-from
-        else:
+        if not (
+            distutils.util.strtobool(
+                os.getenv("USE_ERROR_REPORTING_API", "True")
+            )
+        ):
             raise original_error
+        try:
+            lazy_error_reporting_client().report_exception()
+        except Exception:  # pylint: disable=broad-except
+            # This mostly handles the case where error reporting API is not
+            # enabled or IAM permissions did not allow us to report errors
+            # with error reporting API.
+            raise original_error  # pylint: disable=raise-missing-from
 
 
 def triage_event(gcs_client: Optional[storage.Client],

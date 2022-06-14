@@ -110,16 +110,10 @@ def extract_udf_name(udf_path):
     :param udf_path: Path to the UDF DDL .sql file
     :return: Name of the UDF
     """
-    with open(udf_path) as udf_file:
-        udf_sql = udf_file.read()
+    udf_sql = Path(udf_path).read_text()
     udf_sql = udf_sql.replace('\n', ' ')
     pattern = re.compile(r'FUNCTION\s*`?(\w+.)?(\w+)`?\s*\(')
-    match = pattern.search(udf_sql)
-    if match:
-        udf_name = match[2]
-        return udf_name
-    else:
-        return None
+    return match[2] if (match := pattern.search(udf_sql)) else None
 
 
 def replace_with_null_body(udf_path):
@@ -177,11 +171,10 @@ def get_test_bq_dataset(udf_path):
     :return: Name of test dataset
     """
     udf_parent_dir_name = Path(udf_path).parent.name
-    if os.getenv('SHORT_SHA') is not None:
-        bq_dataset = get_dir_to_dataset_mappings().get(udf_parent_dir_name)
-        return f'{bq_dataset}{DATASET_SUFFIX}'
-    else:
+    if os.getenv('SHORT_SHA') is None:
         return None
+    bq_dataset = get_dir_to_dataset_mappings().get(udf_parent_dir_name)
+    return f'{bq_dataset}{DATASET_SUFFIX}'
 
 
 def delete_datasets(client):
@@ -261,7 +254,7 @@ def generate_webpack_configs():
                     js_dependency_files[0])
         webpack_config_file_path = Path(
             f'{npm_package_config_path.parent.name}-webpack.config.js')
-        minimize_js = True if js_lib_name not in NO_MINIFY_JS_LIBS else False
+        minimize_js = js_lib_name not in NO_MINIFY_JS_LIBS
         js_lib_file_extension = ".min.js" if minimize_js else ".js"
         with open(webpack_config_file_path, 'w') as webpack_config:
             webpack_config.write(
